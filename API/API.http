@@ -1,0 +1,22 @@
+@byTech_HostAddress = http://localhost:5000
+
+### Registrar nuevo usuario
+POST {{byTech_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "userName": "usuario1",
+  "email": "usuario1@example.com",
+  "password": "Password123!"
+}
+
+### Login
+POST {{byTech_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario1@example.com",
+  "password": "Password123!"
+}
+
+###
