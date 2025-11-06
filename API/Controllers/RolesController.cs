@@ -1,5 +1,7 @@
 using Application.DTOs.Roles;
-using Application.Interfaces;
+using Application.Features.Roles.Commands;
+using Application.Features.Roles.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +10,14 @@ namespace API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class RolesController(IRoleService roleService) : ControllerBase
+public class RolesController(IMediator mediator) : ControllerBase
 {
-    private readonly IRoleService _roleService = roleService;
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet]
     public async Task<IActionResult> GetAllRoles()
     {
-        var result = await _roleService.GetAllRolesAsync();
+        var result = await _mediator.Send(new GetAllRolesQuery());
         if (!result.Success)
             return BadRequest(result);
 
@@ -25,7 +27,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetRoleById(string id)
     {
-        var result = await _roleService.GetRoleByIdAsync(id);
+        var result = await _mediator.Send(new GetRoleByIdQuery(id));
         if (!result.Success)
             return NotFound(result);
 
@@ -34,9 +36,9 @@ public class RolesController(IRoleService roleService) : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> CreateRole(RoleRequest dto)
+    public async Task<IActionResult> CreateRole(RoleRequest request)
     {
-        var result = await _roleService.CreateRoleAsync(dto);
+        var result = await _mediator.Send(new CreateRoleCommand(request));
         if (!result.Success)
             return BadRequest(result);
 
@@ -45,9 +47,9 @@ public class RolesController(IRoleService roleService) : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateRole(string id, RoleRequest dto)
+    public async Task<IActionResult> UpdateRole(string id, RoleRequest request)
     {
-        var result = await _roleService.UpdateRoleAsync(id, dto);
+        var result = await _mediator.Send(new UpdateRoleCommand(id, request));
         if (!result.Success)
             return BadRequest(result);
 
@@ -58,7 +60,7 @@ public class RolesController(IRoleService roleService) : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteRole(string id)
     {
-        var result = await _roleService.DeleteRoleAsync(id);
+        var result = await _mediator.Send(new DeleteRoleCommand(id));
         if (!result.Success)
             return BadRequest(result);
 
