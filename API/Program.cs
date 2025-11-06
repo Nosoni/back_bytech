@@ -8,6 +8,7 @@ using System.Text;
 using Application.Interfaces;
 using Application.Services;
 using DotNetEnv;
+using FluentValidation;
 
 // Cargar variables de entorno desde .env
 Env.Load();
@@ -55,6 +56,16 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 //  TODO: investigar estas opciones
 // .AddTokenProvider<EmailTokenProvider<ApplicationUser>>("email") // Token provider personalizado
 // .AddPasswordValidator<CustomPasswordValidator<ApplicationUser>>(); // Validador personalizado
+
+// REGISTRAR MEDIATR
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Application.AssemblyReference).Assembly);
+    cfg.AddOpenBehavior(typeof(Application.Common.Behaviors.ValidationBehavior<,>));
+});
+
+// REGISTRAR FLUENT VALIDATION
+builder.Services.AddValidatorsFromAssembly(typeof(Application.AssemblyReference).Assembly);
 
 // REGISTRAR SERVICIOS
 builder.Services.AddScoped<IAuthService, AuthService>();
