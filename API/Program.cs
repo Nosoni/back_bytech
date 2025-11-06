@@ -59,6 +59,8 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 // REGISTRAR SERVICIOS
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 // CONFIGURAR JWT (autenticación)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
