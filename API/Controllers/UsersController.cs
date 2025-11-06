@@ -1,5 +1,7 @@
 using Application.DTOs.Users;
-using Application.Interfaces;
+using Application.Features.Users.Commands;
+using Application.Features.Users.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,14 +10,14 @@ namespace API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Admin")] // Solo administradores pueden gestionar usuarios
-    public class UsersController(IUserService userService) : ControllerBase
+    public class UsersController(IMediator mediator) : ControllerBase
     {
-        private readonly IUserService _userService = userService;
+        private readonly IMediator _mediator = mediator;
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(UserRequest dto)
+        public async Task<IActionResult> CreateUser(UserRequest request)
         {
-            var result = await _userService.CreateUserAsync(dto);
+            var result = await _mediator.Send(new CreateUserCommand(request));
 
             if (!result.Success)
                 return BadRequest(result);
@@ -26,7 +28,7 @@ namespace API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
-            var result = await _userService.GetUserByIdAsync(id);
+            var result = await _mediator.Send(new GetUserByIdQuery(id));
 
             if (!result.Success)
                 return NotFound(result);
@@ -37,7 +39,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
-            var result = await _userService.GetAllUsersAsync();
+            var result = await _mediator.Send(new GetAllUsersQuery());
 
             if (!result.Success)
                 return BadRequest(result);
@@ -46,9 +48,9 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(string id, UserRequest dto)
+        public async Task<IActionResult> UpdateUser(string id, UserRequest request)
         {
-            var result = await _userService.UpdateUserAsync(id, dto);
+            var result = await _mediator.Send(new UpdateUserCommand(id, request));
 
             if (!result.Success)
                 return BadRequest(result);
@@ -59,7 +61,7 @@ namespace API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            var result = await _userService.DeleteUserAsync(id);
+            var result = await _mediator.Send(new DeleteUserCommand(id));
 
             if (!result.Success)
                 return BadRequest(result);
