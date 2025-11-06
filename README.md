@@ -158,7 +158,7 @@ back/
 │   ├── DTOs/
 │   │   ├── Auth/                       # DTOs de autenticación
 │   │   │   ├── AuthResponse.cs
-│   │   │   ├── LoginRequest.cs
+│   │   │   ├── AuthRequest.cs
 │   │   │   └── RegisterRequest.cs
 │   │   └── Users/                      # DTOs de usuarios
 │   ├── Interfaces/

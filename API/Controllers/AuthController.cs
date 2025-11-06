@@ -10,19 +10,8 @@ namespace API.Controllers
     {
         private readonly IAuthService _authService = authService;
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest dto)
-        {
-            var result = await _authService.RegisterAsync(dto);
-
-            if (!result.Success)
-                return BadRequest(result.Message);
-
-            return Ok(result);
-        }
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest dto)
+        public async Task<IActionResult> Login(AuthRequest dto)
         {
             var result = await _authService.LoginAsync(dto);
 
