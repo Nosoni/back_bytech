@@ -9,6 +9,8 @@ using Application.Interfaces;
 using Application.Services;
 using DotNetEnv;
 using FluentValidation;
+using API.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 // Cargar variables de entorno desde .env
 Env.Load();
@@ -17,8 +19,22 @@ var builder = WebApplication.CreateBuilder(args);
 // AGREGAR SERVICIOS DE OPENAPI
 builder.Services.AddOpenApi();
 
-// AGREGAR SERVICIOS DE AUTORIZACIÓN
-builder.Services.AddAuthorization();
+// CONFIGURAR AUTORIZACIÓN BASADA EN PERMISOS
+builder.Services.AddAuthorization(options =>
+{
+    // Obtener todos los permisos del sistema desde las constantes
+    var permissions = Permissions.GetAll();
+
+    // Registrar una política para cada permiso
+    foreach (var permission in permissions)
+    {
+        options.AddPolicy(permission, policy =>
+            policy.Requirements.Add(new PermissionRequirement(permission)));
+    }
+});
+
+// Registrar el Authorization Handler para permisos
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 // AGREGAR CONTROLADORES (para endpoints)
 builder.Services.AddControllers();

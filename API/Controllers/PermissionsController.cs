@@ -1,6 +1,8 @@
 using Application.Features.Permissions.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using API.Authorization;
+using static API.Authorization.Permissions;
 
 namespace API.Controllers
 {
@@ -11,6 +13,7 @@ namespace API.Controllers
         private readonly IMediator _mediator = mediator;
 
         [HttpGet]
+        [RequirePermission(PermissionsManagement.Read)]
         public async Task<IActionResult> GetAllPermissions()
         {
             var result = await _mediator.Send(new GetAllPermissionsQuery());

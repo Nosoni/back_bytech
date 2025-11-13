@@ -2,19 +2,20 @@ using Application.DTOs.Users;
 using Application.Features.Users.Commands;
 using Application.Features.Users.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using API.Authorization;
+using static API.Authorization.Permissions;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")] // Solo administradores pueden gestionar usuarios
     public class UsersController(IMediator mediator) : ControllerBase
     {
         private readonly IMediator _mediator = mediator;
 
         [HttpPost]
+        [RequirePermission(Users.Create)]
         public async Task<IActionResult> CreateUser(UserRequest request)
         {
             var result = await _mediator.Send(new CreateUserCommand(request));
@@ -26,6 +27,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
+        [RequirePermission(Users.Read)]
         public async Task<IActionResult> GetUserById(string id)
         {
             var result = await _mediator.Send(new GetUserByIdQuery(id));
@@ -37,6 +39,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [RequirePermission(Users.Read)]
         public async Task<IActionResult> GetAllUsers()
         {
             var result = await _mediator.Send(new GetAllUsersQuery());
@@ -48,6 +51,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
+        [RequirePermission(Users.Update)]
         public async Task<IActionResult> UpdateUser(string id, UserRequest request)
         {
             var result = await _mediator.Send(new UpdateUserCommand(id, request));
@@ -59,6 +63,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{id}")]
+        [RequirePermission(Users.Delete)]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var result = await _mediator.Send(new DeleteUserCommand(id));

@@ -146,33 +146,50 @@ dotnet publish -c Release -o ./publish
 ```
 back/
 ├── API/
+│   ├── Authorization/                  # Sistema de autorización por permisos
+│   │   ├── PermissionRequirement.cs
+│   │   ├── PermissionAuthorizationHandler.cs
+│   │   └── RequirePermissionAttribute.cs
 │   ├── Controllers/
-│   │   └── AuthController.cs          # Endpoints de autenticación
+│   │   ├── AuthController.cs           # Endpoints de autenticación
+│   │   ├── UsersController.cs          # Gestión de usuarios
+│   │   ├── RolesController.cs          # Gestión de roles
+│   │   └── PermissionsController.cs    # Gestión de permisos
 │   ├── Program.cs                      # Configuración y punto de entrada
 │   ├── appsettings.json                # Configuración base
 │   └── appsettings.Development.json    # Configuración desarrollo
 │
 ├── Application/
 │   ├── Common/
-│   │   └── Result.cs                   # Wrapper de respuestas
+│   │   ├── Result.cs                   # Wrapper de respuestas
+│   │   └── Behaviors/
+│   │       └── ValidationBehavior.cs   # Comportamiento de validación
 │   ├── DTOs/
 │   │   ├── Auth/                       # DTOs de autenticación
-│   │   │   ├── AuthResponse.cs
-│   │   │   ├── AuthRequest.cs
-│   │   │   └── RegisterRequest.cs
-│   │   └── Users/                      # DTOs de usuarios
+│   │   ├── Users/                      # DTOs de usuarios
+│   │   ├── Roles/                      # DTOs de roles
+│   │   └── Permissions/                # DTOs de permisos
+│   ├── Features/                       # Casos de uso (CQRS con MediatR)
+│   │   ├── Auth/                       # Commands de autenticación
+│   │   ├── Users/                      # Commands/Queries de usuarios
+│   │   ├── Roles/                      # Commands/Queries de roles
+│   │   └── Permissions/                # Queries de permisos
 │   ├── Interfaces/
-│   │   ├── IAuthService.cs
-│   │   └── ITokenService.cs
+│   │   ├── IApplicationDbContext.cs
+│   │   ├── ITokenService.cs
+│   │   └── IUserRoleService.cs
 │   └── Services/
-│       ├── AuthService.cs              # Servicio de autenticación
-│       └── TokenService.cs             # Servicio de generación JWT
+│       ├── TokenService.cs             # Servicio de generación JWT (con permisos)
+│       └── UserRoleService.cs          # Servicio de gestión de roles
 │
 ├── Domain/
-│   └── Entities/
-│       ├── ApplicationUser.cs          # Entidad Usuario
-│       ├── ApplicationRole.cs          # Entidad Rol
-│       └── ApplicationPermission.cs    # Entidad Permiso
+│   ├── Entities/
+│   │   ├── ApplicationUser.cs          # Entidad Usuario
+│   │   ├── ApplicationRole.cs          # Entidad Rol
+│   │   ├── ApplicationPermission.cs    # Entidad Permiso
+│   │   └── BaseEntity.cs               # Entidad base
+│   └── Interfaces/
+│       └── ISoftDelete.cs              # Interface para borrado lógico
 │
 └── Infrastructure/
     ├── Data/
@@ -247,6 +264,110 @@ dotnet test /p:CollectCoverage=true
 - Tokens con tiempo de expiración
 - Validación de firma, issuer y audience
 - ClockSkew en cero (sin tolerancia de tiempo)
+
+## 🔒 Sistema de Autorización Basado en Permisos
+
+El sistema de autorización ha sido migrado de **basado en roles** a **basado en permisos**, permitiendo un control de acceso más granular y flexible.
+
+### Estructura de Datos
+
+- **Users** → **UserRoles** → **Roles** → **RolePermissions** → **Permissions**
+- Cada usuario puede tener múltiples roles
+- Cada rol puede tener múltiples permisos
+- Los endpoints están protegidos por permisos, no por roles
+
+### Componentes
+
+#### 1. PermissionRequirement
+
+Define qué permiso se necesita para acceder a un recurso.
+
+#### 2. PermissionAuthorizationHandler
+
+Valida si el usuario autenticado tiene el permiso requerido leyendo los claims del JWT.
+
+#### 3. RequirePermissionAttribute
+
+Atributo personalizado para aplicar protección en endpoints.
+
+**Uso:**
+
+```csharp
+[RequirePermission("Users.Create")]
+public async Task<IActionResult> CreateUser(UserRequest request)
+```
+
+### Flujo de Autorización
+
+1. **Login** → Usuario se autentica
+2. **Token** → Se genera JWT con claims de permisos basados en roles
+3. **Request** → Usuario hace request con el token
+4. **Validación** → El handler verifica si el token contiene el permiso requerido
+5. **Acceso** → Se concede o deniega acceso
+
+### Convención de Nombres
+
+Formato: `{Recurso}.{Acción}`
+
+**Ejemplos:**
+
+- `Users.Create` - Crear usuarios
+- `Users.Read` - Leer/listar usuarios
+- `Users.Update` - Actualizar usuarios
+- `Users.Delete` - Eliminar usuarios
+- `Roles.Assign` - Asignar roles
+- `Reports.Export` - Exportar reportes
+
+### Permisos Configurados
+
+- `Users.Create`, `Users.Read`, `Users.Update`, `Users.Delete`
+- `Roles.Create`, `Roles.Read`, `Roles.Update`, `Roles.Delete`
+- `Permissions.Create`, `Permissions.Read`, `Permissions.Update`, `Permissions.Delete`
+
+### Ventajas
+
+✅ **Granularidad** - Control fino sobre cada operación  
+✅ **Flexibilidad** - Los permisos se reutilizan entre roles  
+✅ **Escalabilidad** - Agregar permisos no requiere cambios de código  
+✅ **Mantenibilidad** - Permisos gestionados desde la base de datos  
+✅ **Separación** - Lógica de negocio desacoplada de autorización
+
+### Agregar Nuevos Permisos
+
+1. **Insertar en BD:**
+
+```sql
+INSERT INTO "Permissions" ("Name", "Description", "IsActive")
+VALUES ('Products.Create', 'Permite crear productos', true);
+```
+
+2. **Registrar en Program.cs:**
+
+```csharp
+var permissions = new[] { "Users.Create", "Products.Create", ... };
+```
+
+3. **Aplicar en Controller:**
+
+```csharp
+[RequirePermission("Products.Create")]
+public async Task<IActionResult> CreateProduct(ProductRequest request) { }
+```
+
+4. **Asignar a un Rol:**
+
+```sql
+INSERT INTO "RolePermissions" ("RoleId", "PermissionId", "IsActive")
+VALUES ('role-id', 'permission-id', true);
+```
+
+### Notas Importantes
+
+⚠️ Los permisos en `Program.cs` deben coincidir con los nombres en la BD  
+⚠️ Los tokens incluyen todos los permisos del usuario  
+⚠️ Si cambias permisos de un rol, el usuario debe volver a hacer login
+
+Para más detalles, ver [PERMISSION_BASED_AUTHORIZATION.md](./API/PERMISSION_BASED_AUTHORIZATION.md)
 
 ## 📝 Convenciones
 
