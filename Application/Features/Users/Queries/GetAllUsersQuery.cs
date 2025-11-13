@@ -29,6 +29,7 @@ public class GetAllUsersQueryHandler(
                 Id = user.Id.ToString(),
                 UserName = user.UserName!,
                 Email = user.Email!,
+                IsActive = user.IsActive,
                 Roles = roles
             });
         }

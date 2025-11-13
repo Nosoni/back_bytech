@@ -35,7 +35,8 @@ public class GetRoleByIdQueryHandler(RoleManager<ApplicationRole> roleManager)
         return Result<RoleResponse>.OK(new RoleResponse
         {
             Id = role.Id.ToString(),
-            Name = role.Name!
+            Name = role.Name!,
+            IsActive = role.IsActive
         });
     }
 }

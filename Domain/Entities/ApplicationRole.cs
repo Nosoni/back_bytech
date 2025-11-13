@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
-public class ApplicationRole : IdentityRole<Guid>
+public class ApplicationRole : IdentityRole<Guid>, ISoftDelete
 {
-    // Puedes agregar propiedades personalizadas aquí en el futuro
+    public bool IsActive { get; set; } = true;
     public virtual ICollection<ApplicationPermission> ApplicationPermissions { get; set; } = [];
 }

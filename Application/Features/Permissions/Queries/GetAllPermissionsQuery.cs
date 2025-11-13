@@ -19,7 +19,8 @@ public class GetAllPermissionsQueryHandler(IApplicationDbContext context) : IReq
             {
                 Id = p.Id,
                 Name = p.Name,
-                Description = p.Description
+                Description = p.Description,
+                IsActive = p.IsActive
             })
             .ToListAsync(cancellationToken);
 

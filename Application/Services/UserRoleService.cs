@@ -26,7 +26,8 @@ public class UserRoleService(
                 roles.Add(new RoleResponse
                 {
                     Id = role.Id.ToString(),
-                    Name = role.Name!
+                    Name = role.Name!,
+                    IsActive = role.IsActive
                 });
             }
         }

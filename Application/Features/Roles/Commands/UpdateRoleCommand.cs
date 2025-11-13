@@ -42,6 +42,7 @@ public class UpdateRoleCommandHandler(RoleManager<ApplicationRole> roleManager)
             return Result<RoleResponse>.Fail("Ya existe un rol con ese nombre");
 
         role.Name = command.Request.Name;
+        role.IsActive = command.Request.IsActive;
 
         var result = await _roleManager.UpdateAsync(role);
         if (!result.Succeeded)
@@ -53,7 +54,8 @@ public class UpdateRoleCommandHandler(RoleManager<ApplicationRole> roleManager)
         return Result<RoleResponse>.OK(new RoleResponse
         {
             Id = role.Id.ToString(),
-            Name = role.Name!
+            Name = role.Name!,
+            IsActive = role.IsActive
         });
     }
 }

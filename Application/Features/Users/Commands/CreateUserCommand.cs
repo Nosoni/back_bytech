@@ -58,7 +58,8 @@ public class CreateUserCommandHandler(
         {
             UserName = command.Request.UserName,
             Email = command.Request.Email,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            IsActive = true
         };
 
         var result = await _userManager.CreateAsync(user, command.Request.Password!);
@@ -91,6 +92,7 @@ public class CreateUserCommandHandler(
             Id = user.Id.ToString(),
             UserName = user.UserName!,
             Email = user.Email!,
+            IsActive = user.IsActive,
             Roles = roles
         });
     }

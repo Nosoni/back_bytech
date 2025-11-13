@@ -33,7 +33,8 @@ public class CreateRoleCommandHandler(RoleManager<ApplicationRole> roleManager)
 
         var role = new ApplicationRole
         {
-            Name = command.Request.Name
+            Name = command.Request.Name,
+            IsActive = true
         };
 
         var result = await _roleManager.CreateAsync(role);
@@ -46,7 +47,8 @@ public class CreateRoleCommandHandler(RoleManager<ApplicationRole> roleManager)
         return Result<RoleResponse>.OK(new RoleResponse
         {
             Id = role.Id.ToString(),
-            Name = role.Name!
+            Name = role.Name!,
+            IsActive = role.IsActive
         });
     }
 }

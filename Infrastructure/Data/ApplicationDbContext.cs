@@ -16,6 +16,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // Especificar schema para todas las tablas
         builder.HasDefaultSchema("public");
 
+        // Configurar filtro global para borrado lógico
+        // builder.Entity<ApplicationUser>().HasQueryFilter(e => e.IsActive);
+        // builder.Entity<ApplicationRole>().HasQueryFilter(e => e.IsActive);
+        builder.Entity<ApplicationPermission>().HasQueryFilter(e => e.IsActive);
+
         // Configurar la tabla de Usuarios con UUID
         builder.Entity<ApplicationUser>(entity =>
         {
@@ -25,6 +30,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.Id)
                 .HasColumnType("uuid")
                 .HasDefaultValueSql("gen_random_uuid()");
+
+            // Configurar IsActive con valor por defecto
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
 
             // Personalizar longitudes
             entity.Property(e => e.UserName).HasMaxLength(50);
@@ -45,6 +54,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasColumnType("uuid")
                 .HasDefaultValueSql("gen_random_uuid()");
 
+            // Configurar IsActive con valor por defecto
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+
             entity.Property(e => e.Name).HasMaxLength(50).IsRequired();
         });
 
@@ -57,6 +70,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.Id)
                 .HasColumnType("uuid")
                 .HasDefaultValueSql("gen_random_uuid()");
+
+            // Configurar IsActive con valor por defecto
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
 
             // Configurar propiedades
             entity.Property(e => e.Name)
@@ -94,10 +111,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 // Configurar IDs como UUID
                 j.Property("RoleId").HasColumnType("uuid");
                 j.Property("PermissionId").HasColumnType("uuid");
+                
+                // Agregar columna IsActive para borrado lógico
+                j.Property<bool>("IsActive").HasDefaultValue(true);
             }
         );
 
-        builder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
+        // Configurar tabla UserRoles con IsActive
+        builder.Entity<IdentityUserRole<Guid>>(entity =>
+        {
+            entity.ToTable("UserRoles");
+            entity.Property<bool>("IsActive").HasDefaultValue(true);
+        });
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");

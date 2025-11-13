@@ -31,7 +31,9 @@ public class DeleteRoleCommandHandler(RoleManager<ApplicationRole> roleManager)
         if (role == null)
             return Result<bool>.Fail("Rol no encontrado");
 
-        var result = await _roleManager.DeleteAsync(role);
+        role.IsActive = false;
+        var result = await _roleManager.UpdateAsync(role);
+        
         if (!result.Succeeded)
             return Result<bool>.Fail(
                 "Error al eliminar rol",

@@ -31,7 +31,9 @@ public class DeleteUserCommandHandler(UserManager<ApplicationUser> userManager)
         if (user == null)
             return Result<bool>.Fail("Usuario no encontrado");
 
-        var result = await _userManager.DeleteAsync(user);
+        user.IsActive = false;
+        var result = await _userManager.UpdateAsync(user);
+        
         if (!result.Succeeded)
             return Result<bool>.Fail(
                 "Error al eliminar usuario",

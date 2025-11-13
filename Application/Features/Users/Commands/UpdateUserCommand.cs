@@ -77,6 +77,13 @@ public class UpdateUserCommandHandler(
             hasChange = true;
         }
 
+        // Actualizar IsActive
+        if (user.IsActive != command.Request.IsActive)
+        {
+            user.IsActive = command.Request.IsActive;
+            hasChange = true;
+        }
+
         // Actualizar Password si viene
         if (!string.IsNullOrEmpty(command.Request.Password))
         {
@@ -124,6 +131,7 @@ public class UpdateUserCommandHandler(
             Id = user.Id.ToString(),
             UserName = user.UserName!,
             Email = user.Email!,
+            IsActive = user.IsActive,
             Roles = userRoles
         });
     }

@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Domain.Interfaces;
 
 namespace Domain.Entities;
 
 // Clases personalizadas de Identity que usan Guid
-public class ApplicationUser : IdentityUser<Guid>
+public class ApplicationUser : IdentityUser<Guid>, ISoftDelete
 {
-    // Puedes agregar propiedades personalizadas aquí en el futuro
+    public bool IsActive { get; set; } = true;
 }

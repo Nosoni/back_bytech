@@ -20,7 +20,8 @@ public class GetAllRolesQueryHandler(RoleManager<ApplicationRole> roleManager)
             .Select(r => new RoleResponse
             {
                 Id = r.Id.ToString(),
-                Name = r.Name!
+                Name = r.Name!,
+                IsActive = r.IsActive
             })
             .ToListAsync(cancellationToken);
 
