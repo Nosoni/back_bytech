@@ -68,9 +68,11 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddValidatorsFromAssembly(typeof(Application.AssemblyReference).Assembly);
 
 // REGISTRAR SERVICIOS
-builder.Services.AddScoped<ITokenService, TokenService>(); // Servicio de utilidad para generar JWT tokens
-builder.Services.AddScoped<IUserRoleService, UserRoleService>(); // Servicio de utilidad para mapeo de roles
-
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IApplicationDbContext>(provider =>
+    provider.GetRequiredService<ApplicationDbContext>());
+    
 // CONFIGURAR JWT (autenticación)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

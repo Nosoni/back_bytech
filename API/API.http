@@ -19,4 +19,7 @@ Content-Type: application/json
   "password": "Password123!"
 }
 
+### Obtener todos los permisos (público)
+GET {{byTech_HostAddress}}/api/permissionss
+
 ###
